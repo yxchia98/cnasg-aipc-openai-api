@@ -11,7 +11,7 @@ pip install uvicorn fastapi openai
 
 ## Serve OpenAI API Compatible Server
 ```
-uvicorn main:app
+uvicorn server:app
 ```
 
 ## Run sample Client to test Server for `chat.completions` 
