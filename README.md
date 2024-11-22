@@ -6,7 +6,7 @@ OpenAI API Compatible server adapted for Dell AI PCs running NPUs
 
 ## Install Python dependencies
 ```
-pip install fastapi openai
+pip install uvicorn fastapi openai
 ```
 
 ## Serve OpenAI API Compatible Server
