@@ -24,7 +24,7 @@ def on_open(ws):
             # so thread doesn't exit and socket
             # isn't closed
             ws.send("Hello %d" % i)
-            time.sleep(5)
+            time.sleep(1)
 
         time.sleep(1)
         ws.close()
