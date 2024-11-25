@@ -128,6 +128,17 @@ public:
         if(ec)
             return fail(ec, "read");
 
+        // Extract the received message
+        std::string received_message = beast::buffers_to_string(buffer_.data());
+
+        // Prepend "SERVER" to the received message
+        std::string response_message = "Reply from websocket Server: \n" + received_message;
+
+        // Clear the buffer and store the modified message
+        buffer_.consume(buffer_.size());
+        buffer_.commit(net::buffer_copy(buffer_.prepare(response_message.size()),
+                                        net::buffer(response_message)));
+
         // Echo the message
         ws_.text(ws_.got_text());
         ws_.async_write(
@@ -135,6 +146,8 @@ public:
             beast::bind_front_handler(
                 &session::on_write,
                 shared_from_this()));
+        // Print message on server's stdout
+        std::cout << "SENDING BACK - " << beast::make_printable(buffer_.data()) << std::endl;
     }
 
     void
