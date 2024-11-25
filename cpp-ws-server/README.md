@@ -1,6 +1,7 @@
 # C++ Websocket Server
 
-## Step 1: Install Boost:Beast from [https://www.boost.org/doc/libs/1_86_0/more/getting_started/unix-variants.html](https://www.boost.org/doc/libs/1_86_0/more/getting_started/unix-variants.html)
+## Step 1: Install Boost:Beast v1.86.0 from [https://www.boost.org/doc/libs/1_86_0/more/getting_started/unix-variants.html](https://www.boost.org/doc/libs/1_86_0/more/getting_started/unix-variants.html)
+Extract them to this folder `e.g. boost_1_86_0/`
 
 ## Step 2: Pull and start GCC container
 ```
