@@ -11,7 +11,9 @@ bootstrap vc143
 ```
 .\b2
 ```
-and go grab a coffee
+and go grab a coffee \
+5. Go to Project properties → C/C++ → General → Additional Include Directories, and add a path to the boost library root (in my case C:\Program Files (x86)\Boost_1_53). \
+Include a .hpp file in your sources, like #include <boost/lexical_cast/lexical_cast_old.hpp>
 
 ## Step 2: Pull and start GCC container
 ```
