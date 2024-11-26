@@ -16,6 +16,9 @@ constexpr const std::string_view c_option_genie_config = "--genie-config";
 constexpr const std::string_view c_option_base_dir = "--base-dir";
 constexpr const std::string_view c_option_help = "--help";
 constexpr const std::string_view c_option_help_short = "-h";
+constexpr const std::string_view c_option_address = "--address";
+constexpr const std::string_view c_option_port = "--port";
+constexpr const std::string_view c_option_threads = "--threads";
 
 void PrintHelp()
 {
@@ -44,6 +47,10 @@ int main(int argc, char* argv[])
     std::string genie_config_path;
     std::string base_dir;
     std::string config;
+    std::string address;
+    std::string port;
+    std::string threads;
+
     bool invalid_arguments = false;
 
     // Check if argument file path is accessible
@@ -91,6 +98,42 @@ int main(int argc, char* argv[])
             PrintHelp();
             return 0;
         }
+        else if (c_option_address == argv[i])
+        {
+            if (i + 1 < argc)
+            {
+                address = argv[++i];
+            }
+            else
+            {
+                std::cout << "\nMissing value for " << c_option_address << " option.\n";
+                invalid_arguments = true;
+            }
+        }
+        else if (c_option_port == argv[i])
+        {
+            if (i + 1 < argc)
+            {
+                port = argv[++i];
+            }
+            else
+            {
+                std::cout << "\nMissing value for " << c_option_port << " option.\n";
+                invalid_arguments = true;
+            }
+        }
+        else if (c_option_threads == argv[i])
+        {
+            if (i + 1 < argc)
+            {
+                threads = argv[++i];
+            }
+            else
+            {
+                std::cout << "\nMissing value for " << c_option_threads << " option.\n";
+                invalid_arguments = true;
+            }
+        }
         else
         {
             std::cout << "Unsupported option " << argv[i] << " provided.\n";
@@ -99,7 +142,7 @@ int main(int argc, char* argv[])
     }
 
     // If invalid arguments or required arguments are missing, print help and exit.
-    if (invalid_arguments || genie_config_path.empty() || base_dir.empty())
+    if (invalid_arguments || genie_config_path.empty() || base_dir.empty() || argc < 8)
     {
         PrintHelp();
         return 1;
@@ -116,20 +159,20 @@ int main(int argc, char* argv[])
 
         config.assign((std::istreambuf_iterator<char>(config_file)), std::istreambuf_iterator<char>());
 
-        std::cout << genie_config_path + "\n";
-        std::cout << base_dir + "\n";
-        std::cout << config;
+        //std::cout << genie_config_path + "\n";
+        //std::cout << base_dir + "\n";
+        //std::cout << config;
 
 
         std::filesystem::current_path(base_dir);
 
-        std::string user_name;
+        std::string user_name = "USER";
 
         App::ChatApp app(config);
 
         // Get user name to chat with
-        PrintWelcomeMessage();
-        std::getline(std::cin, user_name);
+        //PrintWelcomeMessage();
+        //std::getline(std::cin, user_name);
 
         // Interactive chat
         app.ChatWithUser(user_name);
