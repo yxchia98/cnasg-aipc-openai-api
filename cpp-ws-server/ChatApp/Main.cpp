@@ -116,6 +116,11 @@ int main(int argc, char* argv[])
 
         config.assign((std::istreambuf_iterator<char>(config_file)), std::istreambuf_iterator<char>());
 
+        std::cout << genie_config_path + "\n";
+        std::cout << base_dir + "\n";
+        std::cout << config;
+
+
         std::filesystem::current_path(base_dir);
 
         std::string user_name;

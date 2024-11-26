@@ -1,7 +1,17 @@
 # C++ Websocket Server
 
 ## Step 1: Install Boost:Beast v1.86.0 from [https://www.boost.org/doc/libs/1_86_0/more/getting_started/unix-variants.html](https://www.boost.org/doc/libs/1_86_0/more/getting_started/unix-variants.html)
-Extract them to this folder `e.g. boost_1_86_0/`
+1. Extract them to this folder `e.g. boost_1_86_0/`
+2. Open Developer Command Prompt For VS 2022 and cd into extracted boost directory
+3. Issue the command 
+```
+bootstrap vc143
+```
+4. Next issue the command 
+```
+.\b2
+```
+and go grab a coffee
 
 ## Step 2: Pull and start GCC container
 ```
