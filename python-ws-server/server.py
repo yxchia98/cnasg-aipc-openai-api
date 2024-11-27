@@ -121,9 +121,9 @@ async def aipc_register(req:Request, aipc_type: str, support_model:str):
 
 if __name__ == "__main__":
 
-    # uvicorn.run(app, host="0.0.0.0", port=8000)
-    config = Config(app=app, loop=main_loop)
-    server = Server(config)
-    main_loop.create_task(server.serve())
-    main_loop.run_forever()
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # config = Config(app=app, loop=main_loop)
+    # server = Server(config)
+    # main_loop.create_task(server.serve())
+    # main_loop.run_forever()
     # main_loop.run_until_complete(server.serve())

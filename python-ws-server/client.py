@@ -11,7 +11,7 @@ chat_completion = client.chat.completions.create(
     messages=[
         {
             "role": "user",
-            "content": "What is Dell Technologies? Who is Michael Dell?",
+            "content": "What is Dell Technologies?",
         }
     ],
     model="snapdragon-sealion-v2-1",
