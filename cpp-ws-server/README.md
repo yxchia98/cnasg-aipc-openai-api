@@ -13,36 +13,16 @@ bootstrap vc143
 ```
 and go grab a coffee \
 5. Go to Project properties → C/C++ → General → Additional Include Directories, and add a path to the boost library root (in my case C:\Program Files (x86)\Boost_1_53). \
-Include a .hpp file in your sources, like #include <boost/lexical_cast/lexical_cast_old.hpp>
+Include a .hpp file in your sources, like #include <boost/lexical_cast/lexical_cast_old.hpp> \
 
-## Step 2: Pull and start GCC container
-```
-docker run --rm --gpus all --name=cpp-env -v $PWD:$PWD -w $PWD --network=host -itd gcc:14.2.0
-```
-```
-docker exec -it cpp-env bash
-```
+## Step 2: Build Binaries
+Click on the green button after opening the `ChatApp.sln` file, to build the binaries and test the application
 
-## Step 3: Update Packages
+## Step 3: Run Binaries
+Go to `./cpp-ws-server/ChatApp/` and run `.\ARM64\Debug\ChatApp.exe`, parsing in arguments for config files, address, and port.
 ```
-apt-get update
+cd {Project directory}
 ```
 ```
-apt-get install build-essential gdb
+.\ARM64\Debug\ChatApp.exe --genie-config .\\genie_bundle\\genie_config.json --base-dir .\\genie_bundle\\ --address 0.0.0.0 --port 8001
 ```
-
-## Step 4: Move `genie_bundle` to `ChatApp/` folder
-Move the compiled `genie_bundle` along with the binaries, tokenizers, HTP configs, etc.\
-Refer to `/ai-hub-apps/apps/windows/cpp/ChatApp` from root of this repo for more info.
-
-## Step 5: Build binaries for C++ Websocket Server
-```
-cd cpp-ws-server
-g++ -I ./boost_1_86_0 -o websocket_server_async websocket_server_async.cpp
-```
-
-## Step 6: Start C++ Websocket Server
-```
-./websocket_server_async 0.0.0.0 8001 1
-```
-Test Websocket Server using python scripts provided in `../python-ws-server` 
