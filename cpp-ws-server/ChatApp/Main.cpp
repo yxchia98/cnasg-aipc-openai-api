@@ -116,7 +116,6 @@ constexpr const std::string_view c_option_help = "--help";
 constexpr const std::string_view c_option_help_short = "-h";
 constexpr const std::string_view c_option_address = "--address";
 constexpr const std::string_view c_option_port = "--port";
-constexpr const std::string_view c_option_threads = "--threads";
 
 void PrintHelp()
 {
@@ -126,7 +125,6 @@ void PrintHelp()
               << " <Local directory path>: [Required] Base directory to set as the working directory.\n";
     std::cout << c_option_address << " [Required] Address to host websocket server (e.g. 0.0.0.0).\n";
     std::cout << c_option_port << " [Required] Port to host websocket server (e.g. 8000).\n";
-    std::cout << c_option_threads << " [Required] Threads to run to host websocket server (e.g. 1, 2, 3, 4).\n";
     std::cout << "\nDuring chat with " << App::c_bot_name << ", please type " << App::c_exit_prompt
               << " as a prompt to terminate chat.\n ";
 }
@@ -228,19 +226,6 @@ int main(int argc, char* argv[])
                 invalid_arguments = true;
             }
         }
-        else if (c_option_threads == argv[i])
-        {
-            if (i + 1 < argc)
-            {
-                ws_threads = argv[++i];
-                ws_threads_argv_idx = i;
-            }
-            else
-            {
-                std::cout << "\nMissing value for " << c_option_threads << " option.\n";
-                invalid_arguments = true;
-            }
-        }
         else
         {
             std::cout << "Unsupported option " << argv[i] << " provided.\n";
@@ -249,7 +234,7 @@ int main(int argc, char* argv[])
     }
 
     // If invalid arguments or required arguments are missing, print help and exit.
-    if (invalid_arguments || genie_config_path.empty() || base_dir.empty() || argc < 11)
+    if (invalid_arguments || genie_config_path.empty() || base_dir.empty() || argc < 9)
     {
         PrintHelp();
         return 1;
