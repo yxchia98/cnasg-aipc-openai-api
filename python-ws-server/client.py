@@ -11,10 +11,10 @@ chat_completion = client.chat.completions.create(
     messages=[
         {
             "role": "user",
-            "content": "Say this is a test",
+            "content": "What is Dell Technologies? Who is Michael Dell?",
         }
     ],
-    model="mock-gpt-model",
+    model="snapdragon-sealion-v2-1",
 )
 
 # SCENARIO 1: Non-streamining chat completion
@@ -22,19 +22,19 @@ chat_completion = client.chat.completions.create(
 print(chat_completion.choices[0].message.content)
 
 
-stream = client.chat.completions.create(
-    model="mock-gpt-model",
-    messages=[
-        {
-            "role": "user",
-            "content": "Say this is a test"
-        }
-    ],
-    stream=True,
-)
+# stream = client.chat.completions.create(
+#     model="snapdragon-sealion-v2-1",
+#     messages=[
+#         {
+#             "role": "user",
+#             "content": "Say this is a test"
+#         }
+#     ],
+#     stream=True,
+# )
 
-# SCENARIO 2: Streamining chat completion
-# print the stream
+# # SCENARIO 2: Streamining chat completion
+# # print the stream
 
-for chunk in stream:
-    print(chunk.choices[0].delta.content or "")
+# for chunk in stream:
+#     print(chunk.choices[0].delta.content or "")
