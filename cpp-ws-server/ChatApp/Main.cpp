@@ -14,8 +14,6 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <cstdlib>
 #include <functional>
-#include <iostream>
-#include <string>
 #include <thread>
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
@@ -25,6 +23,17 @@ namespace net = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
 //------------------------------------------------------------------------------
+constexpr const int c_chat_separater_length = 80;
+
+void ChatSplit(bool end_line = true)
+{
+    std::string split_line(c_chat_separater_length, '-');
+    std::cout << "\n" << split_line;
+    if (end_line)
+    {
+        std::cout << "\n";
+    }
+}
 
 // Echoes back all received WebSocket messages
 void
@@ -41,7 +50,7 @@ do_session(tcp::socket socket, App::ChatApp& app)
             {
                 res.set(http::field::server,
                     std::string(BOOST_BEAST_VERSION_STRING) +
-                    " websocket-server-sync");
+                    "snapdragon-websocket-server-sync");
             }));
 
         // Accept the websocket handshake
@@ -51,34 +60,37 @@ do_session(tcp::socket socket, App::ChatApp& app)
         {
             // This buffer will hold the incoming message
             beast::flat_buffer buffer;
+            std::string model_response;
 
             // Read a message
             ws.read(buffer);
 
             std::string received_message = beast::buffers_to_string(buffer.data());
+            ChatSplit();
+            std::cout << "PROMPT:" << beast::make_printable(buffer.data()) << std::endl;
+
+            if (received_message == "exit")
+            {
+                model_response = app.ChatWithUserOnce("exit");
+            }
+            else
+            {
+                model_response = app.ChatWithUserOnce(received_message);
+            }
 
             // Prepend "SERVER" to the received message
-            std::string response_message = "Reply from websocket Server: \n" + received_message;
+            std::string response_message = model_response;
 
             // Clear the buffer and store the modified message
             buffer.consume(buffer.size());
             buffer.commit(net::buffer_copy(buffer.prepare(response_message.size()),
                 net::buffer(response_message)));
 
-            if (received_message == "exit")
-            {
-                app.ChatWithUserOnce("exit");
-            }
-            else
-            {
-                app.ChatWithUserOnce("What is Dell Technologies?");
-            }
-
             // Echo the message back
             ws.text(ws.got_text());
             ws.write(buffer.data());
 
-            std::cout << "SENDING BACK - " << beast::make_printable(buffer.data()) << std::endl;
+            std::cout << "RESPONSE:" << beast::make_printable(buffer.data()) << std::endl;
         }
     }
     catch (beast::system_error const& se)
@@ -277,9 +289,6 @@ int main(int argc, char* argv[])
             acceptor.accept(socket);
 
             // Launch the session, transferring ownership of the socket
-        //    std::thread(
-        //        &do_session,
-        //        std::move(socket)).detach();
             std::thread(
                 &do_session,
                 std::move(socket),

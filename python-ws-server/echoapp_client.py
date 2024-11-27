@@ -2,7 +2,7 @@ import sys
 import time
 from threading import Thread
 
-import websocket
+import websockets
 
 
 def on_message(ws, message):
@@ -23,12 +23,16 @@ def on_open(ws):
             # send the message, then wait
             # so thread doesn't exit and socket
             # isn't closed
-            ws.send("Hello %d" % i)
-            time.sleep(1)
+            await ws.send("Hello %d" % i)
 
-        time.sleep(1)
+        for i in range(3):
+            # send the message, then wait
+            # so thread doesn't exit and socket
+            # isn't closed
+            await ws.send("Hello %d" % i)
         ws.send("exit")
-        ws.close()
+        time.sleep(1)
+        # ws.close()
         print("Thread terminating...")
 
     Thread(target=run).start()

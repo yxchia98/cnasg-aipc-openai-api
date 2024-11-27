@@ -11,9 +11,12 @@ using namespace AppUtils;
 constexpr const std::string_view c_first_prompt_prefix_part_1 =
     "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYour name is ";
 constexpr const std::string_view c_first_prompt_prefix_part_2 =
-    "and you are a helpful AI assistant. Please keep answers consice and to the point. <|eot_id|>\n\n";
+    "and you are a helpful AI assistant. Please keep answers consice and to the point. <|eot_id|>\n";
+constexpr const std::string_view c_first_prompt_prefix_eval =
+"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful AI assistant.<|eot_id|>\n";
 constexpr const std::string_view c_prompt_prefix = "<|start_header_id|>user<|end_header_id|>\n\n";
-constexpr const std::string_view c_end_of_prompt = "<|eot_id|>";
+//constexpr const std::string_view c_end_of_prompt = "<|eot_id|>";
+constexpr const std::string_view c_end_of_prompt = "<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n\n";
 
 /*  Llama2 system prompt
 constexpr const std::string_view c_first_prompt_prefix_part_1 = "[INST] <<SYS>>\nYour name is ";
@@ -28,14 +31,22 @@ PromptHandler::PromptHandler()
 {
 }
 
+// Original PromptHandler that retains context
+//std::string PromptHandler::GetPromptWithTag(const std::string& user_prompt)
+//{
+//    // Ref: https://www.llama.com/docs/model-cards-and-prompt-formats/meta-llama-3/
+//    if (m_is_first_prompt)
+//    {
+//        m_is_first_prompt = false;
+//        return std::string(c_first_prompt_prefix_part_1) + App::c_bot_name.data() +
+//               c_first_prompt_prefix_part_2.data() + user_prompt + c_end_of_prompt.data();
+//    }
+//    return std::string(c_prompt_prefix) + user_prompt.data() + c_end_of_prompt.data();
+//}
+
+// Revised PromptHandler that only does zero-shot inference. FOR BENCHMARKING / EVALUATION
 std::string PromptHandler::GetPromptWithTag(const std::string& user_prompt)
 {
-    // Ref: https://www.llama.com/docs/model-cards-and-prompt-formats/meta-llama-2/
-    if (m_is_first_prompt)
-    {
-        m_is_first_prompt = false;
-        return std::string(c_first_prompt_prefix_part_1) + App::c_bot_name.data() +
-               c_first_prompt_prefix_part_2.data() + user_prompt + c_end_of_prompt.data();
-    }
-    return std::string(c_prompt_prefix) + user_prompt.data() + c_end_of_prompt.data();
+    // Ref: https://www.llama.com/docs/model-cards-and-prompt-formats/meta-llama-3/
+    return std::string(c_first_prompt_prefix_eval) + c_prompt_prefix.data() + user_prompt + c_end_of_prompt.data();
 }

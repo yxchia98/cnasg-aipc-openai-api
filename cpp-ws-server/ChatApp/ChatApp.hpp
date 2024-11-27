@@ -58,6 +58,6 @@ class ChatApp
      * @throws on failure to query model response during chat
      *
      */
-    void ChatWithUserOnce(const std::string& user_prompt);
+    std::string ChatWithUserOnce(const std::string& user_prompt);
 };
 } // namespace App
