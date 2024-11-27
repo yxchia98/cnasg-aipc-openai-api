@@ -27,6 +27,7 @@ def on_open(ws):
             time.sleep(1)
 
         time.sleep(1)
+        ws.send("exit")
         ws.close()
         print("Thread terminating...")
 

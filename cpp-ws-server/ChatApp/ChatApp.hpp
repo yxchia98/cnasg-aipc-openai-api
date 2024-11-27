@@ -49,5 +49,15 @@ class ChatApp
      *
      */
     void ChatWithUser(const std::string& user_name);
+
+    /**
+     * ChatWithUser: Starts Chat with user using previously loaded config
+     *
+     * @param user_prompt: User prompt to use during chat
+     *
+     * @throws on failure to query model response during chat
+     *
+     */
+    void ChatWithUserOnce(const std::string& user_prompt);
 };
 } // namespace App

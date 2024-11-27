@@ -9,6 +9,92 @@
 
 #include "ChatApp.hpp"
 
+#include <boost/beast/core.hpp>
+#include <boost/beast/websocket.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <cstdlib>
+#include <functional>
+#include <iostream>
+#include <string>
+#include <thread>
+
+namespace beast = boost::beast;         // from <boost/beast.hpp>
+namespace http = beast::http;           // from <boost/beast/http.hpp>
+namespace websocket = beast::websocket; // from <boost/beast/websocket.hpp>
+namespace net = boost::asio;            // from <boost/asio.hpp>
+using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
+
+//------------------------------------------------------------------------------
+
+// Echoes back all received WebSocket messages
+void
+do_session(tcp::socket socket, App::ChatApp& app)
+{
+    try
+    {
+        // Construct the stream by moving in the socket
+        websocket::stream<tcp::socket> ws{ std::move(socket) };
+
+        // Set a decorator to change the Server of the handshake
+        ws.set_option(websocket::stream_base::decorator(
+            [](websocket::response_type& res)
+            {
+                res.set(http::field::server,
+                    std::string(BOOST_BEAST_VERSION_STRING) +
+                    " websocket-server-sync");
+            }));
+
+        // Accept the websocket handshake
+        ws.accept();
+
+        for (;;)
+        {
+            // This buffer will hold the incoming message
+            beast::flat_buffer buffer;
+
+            // Read a message
+            ws.read(buffer);
+
+            std::string received_message = beast::buffers_to_string(buffer.data());
+
+            // Prepend "SERVER" to the received message
+            std::string response_message = "Reply from websocket Server: \n" + received_message;
+
+            // Clear the buffer and store the modified message
+            buffer.consume(buffer.size());
+            buffer.commit(net::buffer_copy(buffer.prepare(response_message.size()),
+                net::buffer(response_message)));
+
+            if (received_message == "exit")
+            {
+                app.ChatWithUserOnce("exit");
+            }
+            else
+            {
+                app.ChatWithUserOnce("What is Dell Technologies?");
+            }
+
+            // Echo the message back
+            ws.text(ws.got_text());
+            ws.write(buffer.data());
+
+            std::cout << "SENDING BACK - " << beast::make_printable(buffer.data()) << std::endl;
+        }
+    }
+    catch (beast::system_error const& se)
+    {
+        // This indicates that the session was closed
+        if (se.code() != websocket::error::closed)
+            std::cerr << "Error: " << se.code().message() << std::endl;
+    }
+    catch (std::exception const& e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+}
+
+//------------------------------------------------------------------------------
+
 namespace
 {
 
@@ -26,6 +112,9 @@ void PrintHelp()
     std::cout << c_option_genie_config << " <Local file path>: [Required] Path to local Genie config for model.\n";
     std::cout << c_option_base_dir
               << " <Local directory path>: [Required] Base directory to set as the working directory.\n";
+    std::cout << c_option_address << " [Required] Address to host websocket server (e.g. 0.0.0.0).\n";
+    std::cout << c_option_port << " [Required] Port to host websocket server (e.g. 8000).\n";
+    std::cout << c_option_threads << " [Required] Threads to run to host websocket server (e.g. 1, 2, 3, 4).\n";
     std::cout << "\nDuring chat with " << App::c_bot_name << ", please type " << App::c_exit_prompt
               << " as a prompt to terminate chat.\n ";
 }
@@ -47,9 +136,12 @@ int main(int argc, char* argv[])
     std::string genie_config_path;
     std::string base_dir;
     std::string config;
-    std::string address;
-    std::string port;
-    std::string threads;
+    std::string ws_address;
+    std::string ws_port;
+    std::string ws_threads;
+    int ws_address_argv_idx = 0;
+    int ws_port_argv_idx = 0;
+    int ws_threads_argv_idx = 0;
 
     bool invalid_arguments = false;
 
@@ -102,7 +194,8 @@ int main(int argc, char* argv[])
         {
             if (i + 1 < argc)
             {
-                address = argv[++i];
+                ws_address = argv[++i];
+                ws_address_argv_idx = i;
             }
             else
             {
@@ -114,7 +207,8 @@ int main(int argc, char* argv[])
         {
             if (i + 1 < argc)
             {
-                port = argv[++i];
+                ws_port = argv[++i];
+                ws_port_argv_idx = i;
             }
             else
             {
@@ -126,7 +220,8 @@ int main(int argc, char* argv[])
         {
             if (i + 1 < argc)
             {
-                threads = argv[++i];
+                ws_threads = argv[++i];
+                ws_threads_argv_idx = i;
             }
             else
             {
@@ -142,7 +237,7 @@ int main(int argc, char* argv[])
     }
 
     // If invalid arguments or required arguments are missing, print help and exit.
-    if (invalid_arguments || genie_config_path.empty() || base_dir.empty() || argc < 8)
+    if (invalid_arguments || genie_config_path.empty() || base_dir.empty() || argc < 11)
     {
         PrintHelp();
         return 1;
@@ -150,6 +245,9 @@ int main(int argc, char* argv[])
 
     try
     {
+        auto const address = net::ip::make_address(argv[ws_address_argv_idx]);
+        auto const port = static_cast<unsigned short>(std::atoi(argv[ws_port_argv_idx]));
+
         // Load genie_config_path into std::string config before changing directory
         std::ifstream config_file(genie_config_path);
         if (!config_file)
@@ -159,23 +257,58 @@ int main(int argc, char* argv[])
 
         config.assign((std::istreambuf_iterator<char>(config_file)), std::istreambuf_iterator<char>());
 
-        //std::cout << genie_config_path + "\n";
-        //std::cout << base_dir + "\n";
-        //std::cout << config;
-
-
         std::filesystem::current_path(base_dir);
 
         std::string user_name = "USER";
 
         App::ChatApp app(config);
 
+        // The io_context is required for all I/O
+        net::io_context ioc{ 1 };
+
+        // The acceptor receives incoming connections
+        tcp::acceptor acceptor{ ioc, {address, port} };
+        for (;;)
+        {
+            // This will receive the new connection
+            tcp::socket socket{ ioc };
+
+            // Block until we get a connection
+            acceptor.accept(socket);
+
+            // Launch the session, transferring ownership of the socket
+        //    std::thread(
+        //        &do_session,
+        //        std::move(socket)).detach();
+            std::thread(
+                &do_session,
+                std::move(socket),
+                std::ref(app)).detach();
+        }
+
+
+        // Load genie_config_path into std::string config before changing directory
+        //std::ifstream config_file(genie_config_path);
+        //if (!config_file)
+        //{
+        //    throw std::runtime_error("Failed to open Genie config file: " + genie_config_path);
+        //}
+
+        //config.assign((std::istreambuf_iterator<char>(config_file)), std::istreambuf_iterator<char>());
+
+
+        //std::filesystem::current_path(base_dir);
+
+        //std::string user_name = "USER";
+
+        //App::ChatApp app(config);
+
         // Get user name to chat with
         //PrintWelcomeMessage();
         //std::getline(std::cin, user_name);
 
         // Interactive chat
-        app.ChatWithUser(user_name);
+        //app.ChatWithUser(user_name);
     }
     catch (const std::exception& e)
     {
