@@ -2,7 +2,7 @@ from openai import OpenAI
 
 # init client and connect to localhost server
 client = OpenAI(
-    api_key="fake-api-key",
+    api_key="<API-KEY>",
     base_url="http://localhost:8000" # change the default port if needed
 )
 
@@ -15,6 +15,8 @@ chat_completion = client.chat.completions.create(
         }
     ],
     model="snapdragon-sealion-v2-1",
+    max_tokens = 512,
+    temperature = 0.1,
 )
 
 # SCENARIO 1: Non-streamining chat completion

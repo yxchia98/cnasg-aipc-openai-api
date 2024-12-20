@@ -10,14 +10,20 @@ from typing import Optional, List
 from pydantic import BaseModel, Field
 
 from starlette.responses import StreamingResponse
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, status
 
 from uvicorn import Config, Server
 import uvicorn
 
+from hashlib import sha256
+
+
 
 QUALCOMM_HOST: str = 'ws://localhost:8001/'
 INTEL_HOST: str = 'ws://localhost:8002/'
+
+API_KEY_PLAINTEXT = '<API-PLAINTEXT>'
+
 
 app = FastAPI(title="OpenAI-compatible API")
 
@@ -28,12 +34,11 @@ class Message(BaseModel):
     role: str
     content: str
 
-
 class ChatCompletionRequest(BaseModel):
     model: Optional[str] = "snapdragon-sealion-v2-1"
     messages: List[Message]
-    max_tokens: Optional[int] = 512
-    temperature: Optional[float] = 0.1
+    max_tokens: Optional[int]
+    temperature: Optional[float]
     stream: Optional[bool] = False
 
 
@@ -61,7 +66,15 @@ async def inference(host: str, prompt: str):
         return response
 
 @app.post("/chat/completions")
-async def chat_completions(request: ChatCompletionRequest):
+async def chat_completions(req: Request, request: ChatCompletionRequest):
+    PREFIX = 'Bearer '
+    if req.headers.get("authorization")[len(PREFIX):] != sha256(API_KEY_PLAINTEXT.encode('utf-8')).hexdigest():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="UNAUTHORIZED",
+        )
+
+    # if auth != 
     host = ''
 
     if request.model == "snapdragon-sealion-v2-1":
