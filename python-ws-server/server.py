@@ -18,9 +18,13 @@ import uvicorn
 from hashlib import sha256
 
 
+#SEALIONv2.1 Endpoints
+QUALCOMM_HOST_SEALION_2_1: str = 'ws://localhost:8001/'
+INTEL_HOST_SEALION_2_1: str = 'ws://localhost:8002/'
 
-QUALCOMM_HOST: str = 'ws://localhost:8001/'
-INTEL_HOST: str = 'ws://localhost:8002/'
+#SEALIONv3 Endpoints
+QUALCOMM_HOST_SEALION_3_0: str = 'ws://localhost:8003/'
+INTEL_HOST_SEALION_3_0: str = 'ws://localhost:8004/'
 
 API_KEY_PLAINTEXT = '<API-PLAINTEXT>'
 
@@ -35,7 +39,7 @@ class Message(BaseModel):
     content: str
 
 class ChatCompletionRequest(BaseModel):
-    model: Optional[str] = "snapdragon-sealion-v2-1"
+    model: Optional[str] = "snapdragon-sealion-v3-0"
     messages: List[Message]
     max_tokens: Optional[int]
     temperature: Optional[float]
@@ -78,11 +82,19 @@ async def chat_completions(req: Request, request: ChatCompletionRequest):
     host = ''
 
     if request.model == "snapdragon-sealion-v2-1":
-        host = QUALCOMM_HOST
-        print(f"using Qualcomm AI PC: {host}")
+        host = QUALCOMM_HOST_SEALION_2_1
+        print(f"using SEALIONv2.1 on Qualcomm AI PC: {host}")
     if request.model == "lunarlake-sealion-v2-1":
-        host = INTEL_HOST
-        print(f"using Intel AI PC: {host}")
+        host = INTEL_HOST_SEALION_2_1
+        print(f"using SEALIONv2.1 on Intel AI PC: {host}")
+
+    if request.model == "snapdragon-sealion-v3-0":
+        host = QUALCOMM_HOST_SEALION_3_0
+        print(f"using SEALIONv3 on Qualcomm AI PC: {host}")
+
+    if request.model == "lunarlake-sealion-v3-0":
+        host = INTEL_HOST_SEALION_3_0
+        print(f"using SEALIONv3 on Intel AI PC: {host}")
 
     if request.messages:
         # resp_content = (
