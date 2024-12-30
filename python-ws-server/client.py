@@ -1,9 +1,20 @@
 from openai import OpenAI
 
+import httpx
+
+httpx_client = httpx.Client(verify=False)
+
 # init client and connect to localhost server
+# client = OpenAI(
+#     api_key="<API-KEY-HERE>",
+#     http_client=httpx_client,
+#     base_url="http://localhost:8000" # change the default port if needed
+# )
+
 client = OpenAI(
-    api_key="<API-KEY>",
-    base_url="http://localhost:8000" # change the default port if needed
+    api_key="<API-KEY-HERE>",
+    http_client=httpx_client,
+    base_url="https://203.126.124.228" # change the default port if needed
 )
 
 # call API
@@ -15,28 +26,9 @@ chat_completion = client.chat.completions.create(
         }
     ],
     model="snapdragon-sealion-v2-1",
-    max_tokens = 512,
+    max_tokens = 100,
     temperature = 0.1,
 )
 
-# SCENARIO 1: Non-streamining chat completion
-# print the top "choice" 
+# Non-streaming chat completion
 print(chat_completion.choices[0].message.content)
-
-
-# stream = client.chat.completions.create(
-#     model="snapdragon-sealion-v2-1",
-#     messages=[
-#         {
-#             "role": "user",
-#             "content": "Say this is a test"
-#         }
-#     ],
-#     stream=True,
-# )
-
-# # SCENARIO 2: Streamining chat completion
-# # print the stream
-
-# for chunk in stream:
-#     print(chunk.choices[0].delta.content or "")
