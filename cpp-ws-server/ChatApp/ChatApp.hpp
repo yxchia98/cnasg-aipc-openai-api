@@ -11,7 +11,7 @@
 
 namespace App
 {
-constexpr const std::string_view c_exit_prompt = "exit";
+constexpr const std::string_view c_exit_prompt = "supersecretexitpasswordsequence";
 constexpr const std::string_view c_bot_name = "Qbot";
 
 class ChatApp

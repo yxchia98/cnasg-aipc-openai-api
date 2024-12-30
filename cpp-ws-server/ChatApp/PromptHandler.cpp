@@ -13,7 +13,7 @@ constexpr const std::string_view c_first_prompt_prefix_part_1 =
 constexpr const std::string_view c_first_prompt_prefix_part_2 =
     "and you are a helpful AI assistant. Please keep answers consice and to the point. <|eot_id|>\n";
 constexpr const std::string_view c_first_prompt_prefix_eval =
-"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful AI assistant.<|eot_id|>\n";
+"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful assistant<|eot_id|>";
 constexpr const std::string_view c_prompt_prefix = "<|start_header_id|>user<|end_header_id|>\n\n";
 //constexpr const std::string_view c_end_of_prompt = "<|eot_id|>";
 constexpr const std::string_view c_end_of_prompt = "<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n\n";

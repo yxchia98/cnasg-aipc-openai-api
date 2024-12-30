@@ -26,7 +26,7 @@ INTEL_HOST_SEALION_2_1: str = 'ws://localhost:8002/'
 QUALCOMM_HOST_SEALION_3_0: str = 'ws://localhost:8003/'
 INTEL_HOST_SEALION_3_0: str = 'ws://localhost:8004/'
 
-API_KEY_PLAINTEXT = '<API-PLAINTEXT>'
+API_KEY_PLAINTEXT = '<API-KEY-PLAINTEXT>'
 
 
 app = FastAPI(title="OpenAI-compatible API")
@@ -41,8 +41,8 @@ class Message(BaseModel):
 class ChatCompletionRequest(BaseModel):
     model: Optional[str] = "snapdragon-sealion-v3-0"
     messages: List[Message]
-    max_tokens: Optional[int]
-    temperature: Optional[float]
+    max_tokens: Optional[int] = 512
+    temperature: Optional[float] = 0.1
     stream: Optional[bool] = False
 
 
@@ -64,7 +64,7 @@ class ChatCompletionRequest(BaseModel):
 
 # async websocket inference 
 async def inference(host: str, prompt: str):
-    async with websockets.connect(host) as websocket:
+    async with websockets.connect(host, ping_interval=120.0) as websocket:
         await websocket.send(prompt)
         response = await websocket.recv()
         return response
